@@ -1,5 +1,7 @@
 // Imports -------------------------------
 import express from 'express';
+import recipeRouter from './routers/recipe-router.js';
+
 // Configure  express app ----------------
 const app = new express();
 
@@ -8,7 +10,7 @@ const app = new express();
 // Controllers ---------------------------
 
 // Endpoints -----------------------------
-app.get('/hello', (req, res) => res.send("hello there server running for roasterybakery"));
+app.use('/api/recipes', recipeRouter);
 
 // Start server --------------------------
 const PORT = process.env.PORT || 5000;

@@ -3,7 +3,7 @@ import mysql from 'mysql2/promise';
 
 // Database configuration ----------
 const dbConfig = {
-    database: '',
+    database: 'roasterybakery',
     port: 3306,
     host: 'localhost',
     user: 'root',
