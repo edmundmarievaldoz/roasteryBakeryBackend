@@ -12,6 +12,8 @@ const makeRouter = (controller) => {
         if (!Number.isInteger(Number(req.params.id))) return next ('route');
         controller.get(req, res, 'primary')});
 
+        router.post('/', controller.post);
+
     return router;
 };
 
