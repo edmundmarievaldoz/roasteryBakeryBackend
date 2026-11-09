@@ -8,6 +8,13 @@ model.fields = [
   "ingredientQuantity",
 ];
 
+model.buildCreateQuery = (req) => {
+  return `INSERT INTO ${model.table} SET
+    recipeID = :recipeID,
+    ingredientID = :ingredientID,
+    ingredientQuantity = :ingredientQuantity`;
+};
+
 model.buildReadQuery = (req, variant) => {
   let table = model.table;
   let fields = [
