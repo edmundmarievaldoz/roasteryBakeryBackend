@@ -3,6 +3,12 @@ const model = {};
 model.table = "recipes";
 model.fields = ["recipes.recipeID", "recipes.recipeName"];
 
+model.buildCreateQuery = (req) => {
+  return `INSERT INTO ${model.table} SET
+    recipeName=:recipeName
+  `;
+};
+
 model.buildReadQuery = (req, variant) => {
   let table = model.table;
   let fields = ["recipes.recipeID", "recipes.recipeName"];
