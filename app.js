@@ -1,5 +1,6 @@
 // Imports -------------------------------
 import express from "express";
+import allergenRouter from "./routers/allergen-router.js";
 import recipeRouter from "./routers/recipe-router.js";
 import ingredientRouter from "./routers/ingredient-router.js";
 import recipeIngredientRouter from "./routers/recipeIngredient-router.js";
@@ -21,6 +22,7 @@ app.use(function (req, res, next) {
 // Controllers ---------------------------
 
 // Endpoints -----------------------------
+app.use("/api/allergens", allergenRouter);
 app.use("/api/recipes", recipeRouter);
 app.use("/api/ingredients", ingredientRouter);
 app.use("/api/recipeingredients", recipeIngredientRouter);
