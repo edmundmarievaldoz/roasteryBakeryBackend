@@ -2,6 +2,7 @@ class Controller {
   constructor(model, database) {
     this.buildCreateQuery = model.buildCreateQuery;
     this.buildReadQuery = model.buildReadQuery;
+    this.buildReadParameters = model.buildReadParameters; // optional
     this.database = database;
   }
 
@@ -9,7 +10,10 @@ class Controller {
 
   get = async (req, res, variant) => {
     const sql = this.buildReadQuery(req, variant);
-    const parameter = { ID: parseInt(req.params.id) };
+    const extraParameters = this.buildReadParameters
+      ? this.buildReadParameters(req, variant)
+      : {};
+    const parameter = { ...extraParameters, ID: parseInt(req.params.id) };
 
     try {
       const [result] = await this.database.query(sql, parameter);

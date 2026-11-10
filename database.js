@@ -11,12 +11,17 @@ const dbConfig = {
     namedPlaceholders: true,
 };
 
-// Database Connection --------------
+// Database Connection Pool ---------
+// A pool, so a transaction can take its own connection (getConnection) without
+// other requests' queries running inside it. pool.query works like connection.query.
 
 let database = null;
 
 try{
-    database = await mysql.createConnection(dbConfig);
+    database = mysql.createPool(dbConfig);
+    // createPool connects lazily, so test one connection now to fail fast at startup
+    const connection = await database.getConnection();
+    connection.release();
 } catch (error) {
     console.log(`Error in establishing database connection: ${error.message}`);
     process.exit();
