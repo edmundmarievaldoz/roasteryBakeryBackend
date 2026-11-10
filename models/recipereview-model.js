@@ -9,6 +9,33 @@ model.fields = [
   "reviewComment",
   "reviewDate",
 ];
+model.reviewStatuses = ["Approved", "Rejected"];
+
+// Review creation (POST /api/recipereviews) --------
+// Run by the bespoke POST handler, which binds the named parameters explicitly.
+
+// Reviewer and their role name, to check they are a Compliance Lead
+model.buildReviewerQuery = () => {
+  return `SELECT users.userID, roles.roleName
+    FROM users LEFT JOIN roles ON users.userRoleID = roles.roleID
+    WHERE users.userID = :reviewerID`;
+};
+
+// Run inside the transaction: locks the recipe row so two reviews cannot both pass the Pending check
+model.buildRecipeLockQuery = () => {
+  return `SELECT recipeID, recipeStatus FROM recipes
+    WHERE recipeID = :recipeID FOR UPDATE`;
+};
+
+model.buildCreateQuery = () => {
+  return `INSERT INTO ${model.table} (recipeID, reviewerID, reviewStatus, reviewComment)
+    VALUES (:recipeID, :reviewerID, :reviewStatus, :reviewComment)`;
+};
+
+model.buildRecipeStatusUpdateQuery = () => {
+  return `UPDATE recipes SET recipeStatus = :reviewStatus
+    WHERE recipeID = :recipeID`;
+};
 
 model.buildReadQuery = (req, variant) => {
   let table = model.table;
