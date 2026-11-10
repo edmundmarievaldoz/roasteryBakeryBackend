@@ -5,6 +5,7 @@ import recipeRouter from "./routers/recipe-router.js";
 import ingredientRouter from "./routers/ingredient-router.js";
 import ingredientAllergenRouter from "./routers/ingredientallergen-router.js";
 import recipeIngredientRouter from "./routers/recipeIngredient-router.js";
+import recipeReviewRouter from "./routers/recipereview-router.js";
 import userRouter from "./routers/user-router.js";
 
 // Configure  express app ----------------
@@ -29,6 +30,7 @@ app.use("/api/recipes", recipeRouter);
 app.use("/api/ingredients", ingredientRouter);
 app.use("/api/ingredientallergens", ingredientAllergenRouter);
 app.use("/api/recipeingredients", recipeIngredientRouter);
+app.use("/api/recipereviews", recipeReviewRouter);
 app.use("/api/users", userRouter);
 // Start server --------------------------
 const PORT = process.env.PORT || 5000;

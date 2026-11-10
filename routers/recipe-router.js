@@ -2,12 +2,14 @@
 import { Router } from 'express';
 import Controller from '../Controller.js';
 import model from '../models/recipe-model.js';
+import allergenModel from '../models/allergen-model.js';
 import database from '../database.js';
 import makeRouter from './makeRouter.js';
 
 // Controller ------------------------
 
 const controller = new Controller(model, database);
+const allergenController = new Controller(allergenModel, database);
 
 // Router ----------------------------
 
@@ -26,6 +28,16 @@ router.get('/', (req, res, next) => {
         });
     }
     controller.get(req, res, 'status');
+});
+
+// GET /api/recipes/:id/allergens
+router.get('/:id/allergens', (req, res) => {
+    if (!/^[1-9]\d*$/.test(req.params.id)) {
+        return res.status(400).json({
+            message: `Invalid recipe id '${req.params.id}'. Must be a positive integer.`,
+        });
+    }
+    allergenController.get(req, res, 'recipe');
 });
 
 // Generic Endpoints -----------------
