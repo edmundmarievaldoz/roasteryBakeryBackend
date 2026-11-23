@@ -1,5 +1,6 @@
 // Import ----------------------------
 import {Router} from 'express';
+import validateID from '../middleware/validateID.js';
 
 const makeRouter = (controller) => {
     // Router -----------------------
@@ -8,11 +9,8 @@ const makeRouter = (controller) => {
     //Generic Endpoints -------------
 
     router.get('/', (req, res) => controller.get(req, res, null));
-    router.get('/:id', (req, res, next) =>  {
-        if (!Number.isInteger(Number(req.params.id))) return next ('route');
-        controller.get(req, res, 'primary')});
-
-        router.post('/', controller.post);
+    router.get('/:id', validateID, (req, res) => controller.get(req, res, 'primary'));
+    router.post('/', controller.post);
 
     return router;
 };
