@@ -5,6 +5,7 @@ import model from '../models/recipe-model.js';
 import allergenModel from '../models/allergen-model.js';
 import database from '../database.js';
 import makeRouter from './makeRouter.js';
+import validateID from '../middleware/validateID.js';
 
 // Controller ------------------------
 
@@ -31,13 +32,41 @@ router.get('/', (req, res, next) => {
 });
 
 // GET /api/recipes/:id/allergens
-router.get('/:id/allergens', (req, res) => {
-    if (!/^[1-9]\d*$/.test(req.params.id)) {
-        return res.status(400).json({
-            message: `Invalid recipe id '${req.params.id}'. Must be a positive integer.`,
-        });
+router.get('/:id/allergens', validateID, (req, res) => allergenController.get(req, res, 'recipe'));
+
+// POST /api/recipes (validation only)
+// Body: { recipeName, recipeCreatedBy }
+// On success it calls next(), so makeRouter's generic POST / inserts the recipe.
+router.post('/', async (req, res, next) => {
+    // Validate body format ----------
+    const body = req.body;
+    if (body === null || typeof body !== 'object' || Array.isArray(body)) {
+        return res.status(400).json({ message: 'Request body must be a JSON object.' });
     }
-    allergenController.get(req, res, 'recipe');
+
+    const { recipeName, recipeCreatedBy } = body;
+
+    if (typeof recipeName !== 'string' || recipeName.trim() === '') {
+        return res.status(400).json({ message: 'recipeName must be a non-empty string.' });
+    }
+    body.recipeName = recipeName.trim();
+
+    if (!Number.isInteger(recipeCreatedBy) || recipeCreatedBy <= 0) {
+        return res.status(400).json({ message: 'recipeCreatedBy must be a positive integer.' });
+    }
+
+    // Validate creator exists -------
+    try {
+        const [users] = await database.query(model.buildUserExistsQuery(), { recipeCreatedBy });
+        if (users.length === 0) {
+            return res.status(400).json({ message: `User ${recipeCreatedBy} does not exist.` });
+        }
+    } catch (error) {
+        console.log('SQL ERROR:', error);
+        return res.status(500).json({ message: `Failed to check user: ${error.message}` });
+    }
+
+    next();
 });
 
 // Generic Endpoints -----------------

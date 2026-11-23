@@ -23,7 +23,8 @@ Express 5 REST API using ES modules. Each resource is a model, a router, and a m
 - **`Controller.js`**: generic `get` and `post` handlers that run whatever SQL the model builds. One class serves every resource.
 - **`routers/makeRouter.js`**: creates the standard routes (`GET /`, `GET /:id`, `POST /`) for a controller.
 - **`routers/*-router.js`**: wires a model to a `Controller` and `makeRouter`, then adds any bespoke routes under the `Bespoke Endpoints` comment.
-- **`database.js`**: creates a single shared connection (not a pool) using top-level await.
+- **`middleware/validateID.js`**: route middleware that returns 400 `{ message }` unless `req.params.id` is a positive integer. Every route with `:id` uses it, e.g. `router.get('/recipe/:id', validateID, handler)`.
+- **`database.js`**: creates a connection pool (so transactions can use `getConnection()`), tested at startup with top-level await.
 
 ### Read variants
 
@@ -33,9 +34,11 @@ Express 5 REST API using ES modules. Each resource is a model, a router, and a m
 
 - `Controller` copies the query builders off the model, so they run without `this`. Builders must refer to the `model` variable, not `this.table`.
 - `database.js` enables `namedPlaceholders`. `post` passes `req.body` directly as the query parameters, so JSON body keys must match the `:placeholder` names in `buildCreateQuery`. A missing key causes a 500.
-- After an insert, `post` calls `get` with a stub request containing only `params.id`, using the `'primary'` variant. Every model needs a `'primary'` case, and it must not read anything else from `req`.
-- `get` binds the id as `:ID` for every variant, so the `WHERE` clause must use that name.
-- `get` always responds with an array, including for single-record lookups and after `post`, and returns 404 when there are no rows, including for an empty list.
+- After an insert, `post` calls `read` with a stub request containing only `params.id`, using the `'primary'` variant, and responds 201 with the new record. Every model needs a `'primary'` case, and it must not read anything else from `req`.
+- `read` binds the id as `:ID` for every variant, so the `WHERE` clause must use that name.
+- `get` and `post` always respond with an array, including for single-record lookups. List and filter reads return 200 with `[]` when there are no rows; only the `'primary'` variant returns 404 `{ message }`.
+- Every error response is a JSON object `{ message }`.
+- `POST /api/recipes` has a bespoke validator in `recipe-router.js` that runs before the generic POST: `recipeName` must be a non-empty string (trimmed), and `recipeCreatedBy` must be a positive integer of an existing user (400 otherwise), because `recipes.recipeCreatedBy` is `NOT NULL`.
 - The CORS middleware in `app.js` does not set `Access-Control-Allow-Methods`, so browser clients will fail preflight for `PUT` or `DELETE` until it does.
 
 ## Version Control

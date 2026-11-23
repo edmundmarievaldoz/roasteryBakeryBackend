@@ -11,8 +11,14 @@ model.statuses = ["Pending", "Approved", "Rejected"];
 
 model.buildCreateQuery = (req) => {
   return `INSERT INTO ${model.table} SET
-    recipeName=:recipeName
+    recipeName = :recipeName,
+    recipeCreatedBy = :recipeCreatedBy
   `;
+};
+
+// Run by the bespoke POST validator, to check the creator exists before inserting
+model.buildUserExistsQuery = () => {
+  return `SELECT userID FROM users WHERE userID = :recipeCreatedBy`;
 };
 
 model.buildReadQuery = (req, variant) => {
